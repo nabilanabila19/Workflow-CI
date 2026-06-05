@@ -105,9 +105,11 @@ def plot_feature_importance(model, feature_names: list, save_path: str):
 # MAIN — Training + MLflow Logging
 def train_and_log(data_path: str):
     
-    mlflow.set_experiment(EXPERIMENT_NAME)
-    print(f" MLflow tracking lokal")
-    print(f"   Experiment: {EXPERIMENT_NAME}")
+    # mlflow.set_experiment(EXPERIMENT_NAME)
+    # print(f" MLflow tracking lokal")
+    # print(f"   Experiment: {EXPERIMENT_NAME}")
+
+    print(f" MLflow tracking lokal — experiment dihandle MLflow Project")
 
     X_train, X_test, y_train, y_test, feature_names = load_data(data_path)
 
@@ -122,10 +124,7 @@ def train_and_log(data_path: str):
     print(f"\n Memulai training Random Forest...")
     print(f"   Parameter: {params}")
 
-    run = mlflow.active_run()
-    if run is None:
-        mlflow.start_run(run_name="rf_ci_run")
-        run = mlflow.active_run()
+    run = mlflow.active_run() or mlflow.start_run(run_name="rf_ci_run")
 
     # Train model
     model = RandomForestClassifier(**params)
