@@ -30,6 +30,7 @@ jobs:
         run: |
           mlflow run MLProject/ \
             --env-manager=local \
+            --experiment-name=sumselfire-fire-risk-ci \
             -P data_path=fire_risk_dataset_preprocessing/fire_risk_preprocessed.csv
 
       - name: Upload artifacts to GitHub
