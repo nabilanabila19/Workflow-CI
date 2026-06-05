@@ -1,0 +1,11 @@
+name: sumselfire-fire-risk
+
+conda_env: conda.yaml
+
+entry_points:
+  main:
+    parameters:
+      data_path:
+        type: str
+        default: "fire_risk_dataset_preprocessing/fire_risk_preprocessed.csv"
+    command: "python modelling.py --data_path {data_path}"
