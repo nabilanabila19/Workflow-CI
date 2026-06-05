@@ -1,0 +1,15 @@
+artifact_uri: file:///home/runner/work/Workflow-CI/Workflow-CI/mlruns/331138227251465126/ae1e7a239fea4afebda83ee3bbd71c47/artifacts
+end_time: 1780661831499
+entry_point_name: ''
+experiment_id: '331138227251465126'
+lifecycle_stage: active
+run_id: ae1e7a239fea4afebda83ee3bbd71c47
+run_name: sassy-ox-913
+run_uuid: ae1e7a239fea4afebda83ee3bbd71c47
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1780661821870
+status: 3
+tags: []
+user_id: runner
