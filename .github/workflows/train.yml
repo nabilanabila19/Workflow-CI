@@ -50,3 +50,19 @@ jobs:
           git add mlruns/
           git diff --staged --quiet || git commit -m "ci: update mlruns artifacts [skip ci]"
           git push 
+
+      - name: Build Docker Image
+        run: |
+          python -m mlflow models build-docker \
+            -m "mlruns/331138227251465126/bf6604ff91bf4031b19b64965d5a6fa2/artifacts/random_forest_model" \
+            -n ${{ secrets.DOCKERHUB_USERNAME }}/sumselfire-fire-risk \
+            --env-manager local
+
+      - name: Login to Docker Hub
+        run: |
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login \
+            -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+      - name: Push Docker Image to Docker Hub
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/sumselfire-fire-risk:latest
