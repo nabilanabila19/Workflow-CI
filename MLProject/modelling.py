@@ -104,17 +104,13 @@ def plot_feature_importance(model, feature_names: list, save_path: str):
 
 # MAIN — Training + MLflow Logging
 def train_and_log(data_path: str):
-    """Latih model dan log semua metrics + artefak ke MLflow lokal."""
-
-    # Setup MLflow lokal
+    
     mlflow.set_experiment(EXPERIMENT_NAME)
     print(f" MLflow tracking lokal")
     print(f"   Experiment: {EXPERIMENT_NAME}")
 
-    # Load data
     X_train, X_test, y_train, y_test, feature_names = load_data(data_path)
 
-    # Parameter model
     params = {
         "n_estimators"     : 100,
         "max_depth"        : 3,
@@ -126,90 +122,91 @@ def train_and_log(data_path: str):
     print(f"\n Memulai training Random Forest...")
     print(f"   Parameter: {params}")
 
-    active_run = mlflow.active_run()
-    with mlflow.start_run(run_name="rf_ci_run", run_id=active_run.info.run_id if active_run else None) as run:
+    run = mlflow.active_run()
+    if run is None:
+        mlflow.start_run(run_name="rf_ci_run")
+        run = mlflow.active_run()
 
-        # Train model
-        model = RandomForestClassifier(**params)
-        model.fit(X_train, y_train)
-        y_pred      = model.predict(X_test)
-        y_pred_prob = model.predict_proba(X_test)[:, 1]
+    # Train model
+    model = RandomForestClassifier(**params)
+    model.fit(X_train, y_train)
+    y_pred      = model.predict(X_test)
+    y_pred_prob = model.predict_proba(X_test)[:, 1]
 
-        # Hitung metrics
-        accuracy  = accuracy_score(y_test, y_pred)
-        precision = precision_score(y_test, y_pred)
-        recall    = recall_score(y_test, y_pred)
-        f1        = f1_score(y_test, y_pred)
-        roc_auc   = roc_auc_score(y_test, y_pred_prob)
-        cv_scores = cross_val_score(model, X_train, y_train, cv=5, scoring='accuracy')
-        cv_mean   = cv_scores.mean()
-        cv_std    = cv_scores.std()
+    # Hitung metrics
+    accuracy  = accuracy_score(y_test, y_pred)
+    precision = precision_score(y_test, y_pred)
+    recall    = recall_score(y_test, y_pred)
+    f1        = f1_score(y_test, y_pred)
+    roc_auc   = roc_auc_score(y_test, y_pred_prob)
+    cv_scores = cross_val_score(model, X_train, y_train, cv=5, scoring='accuracy')
+    cv_mean   = cv_scores.mean()
+    cv_std    = cv_scores.std()
 
-        print(f"\n Hasil Evaluasi:")
-        print(f"   Accuracy   : {accuracy:.4f}")
-        print(f"   Precision  : {precision:.4f}")
-        print(f"   Recall     : {recall:.4f}")
-        print(f"   F1-Score   : {f1:.4f}")
-        print(f"   ROC-AUC    : {roc_auc:.4f}")
-        print(f"   CV Accuracy: {cv_mean:.4f} ± {cv_std:.4f}")
+    print(f"\n Hasil Evaluasi:")
+    print(f"   Accuracy   : {accuracy:.4f}")
+    print(f"   Precision  : {precision:.4f}")
+    print(f"   Recall     : {recall:.4f}")
+    print(f"   F1-Score   : {f1:.4f}")
+    print(f"   ROC-AUC    : {roc_auc:.4f}")
+    print(f"   CV Accuracy: {cv_mean:.4f} ± {cv_std:.4f}")
 
-        # Manual Logging — Parameters
-        mlflow.log_param("model_type",         "RandomForestClassifier")
-        mlflow.log_param("n_estimators",        params["n_estimators"])
-        mlflow.log_param("max_depth",           str(params["max_depth"]))
-        mlflow.log_param("min_samples_split",   params["min_samples_split"])
-        mlflow.log_param("min_samples_leaf",    params["min_samples_leaf"])
-        mlflow.log_param("random_state",        params["random_state"])
-        mlflow.log_param("test_size",           TEST_SIZE)
-        mlflow.log_param("train_size",          len(X_train))
-        mlflow.log_param("test_size_rows",      len(X_test))
-        mlflow.log_param("n_features",          len(feature_names))
-        mlflow.log_param("data_path",           data_path)
+    # Manual Logging — Parameters
+    mlflow.log_param("model_type",         "RandomForestClassifier")
+    mlflow.log_param("n_estimators",        params["n_estimators"])
+    mlflow.log_param("max_depth",           str(params["max_depth"]))
+    mlflow.log_param("min_samples_split",   params["min_samples_split"])
+    mlflow.log_param("min_samples_leaf",    params["min_samples_leaf"])
+    mlflow.log_param("random_state",        params["random_state"])
+    mlflow.log_param("test_size",           TEST_SIZE)
+    mlflow.log_param("train_size",          len(X_train))
+    mlflow.log_param("test_size_rows",      len(X_test))
+    mlflow.log_param("n_features",          len(feature_names))
+    mlflow.log_param("data_path",           data_path)
 
-        # Manual Logging — Metrics
-        mlflow.log_metric("accuracy",           accuracy)
-        mlflow.log_metric("precision",          precision)
-        mlflow.log_metric("recall",             recall)
-        mlflow.log_metric("f1_score",           f1)
-        mlflow.log_metric("roc_auc",            roc_auc)
-        mlflow.log_metric("cv_accuracy_mean",   cv_mean)
-        mlflow.log_metric("cv_accuracy_std",    cv_std)
+    # Manual Logging — Metrics
+    mlflow.log_metric("accuracy",           accuracy)
+    mlflow.log_metric("precision",          precision)
+    mlflow.log_metric("recall",             recall)
+    mlflow.log_metric("f1_score",           f1)
+    mlflow.log_metric("roc_auc",            roc_auc)
+    mlflow.log_metric("cv_accuracy_mean",   cv_mean)
+    mlflow.log_metric("cv_accuracy_std",    cv_std)
 
-        # Tags
-        mlflow.set_tag("dataset",    "SumselFire 2019-2024")
-        mlflow.set_tag("task",       "fire_risk_classification")
-        mlflow.set_tag("model",      "RandomForest")
-        mlflow.set_tag("triggered",  "GitHub Actions CI")
+    # Tags
+    mlflow.set_tag("dataset",    "SumselFire 2019-2024")
+    mlflow.set_tag("task",       "fire_risk_classification")
+    mlflow.set_tag("model",      "RandomForest")
+    mlflow.set_tag("triggered",  "GitHub Actions CI")
 
-        # Artefak 1 — Confusion Matrix
-        print("\n Menyimpan artefak...")
-        cm_path = "confusion_matrix.png"
-        plot_confusion_matrix(y_test, y_pred, cm_path)
-        mlflow.log_artifact(cm_path)
+    # Artefak 1 — Confusion Matrix
+    print("\n Menyimpan artefak...")
+    cm_path = "confusion_matrix.png"
+    plot_confusion_matrix(y_test, y_pred, cm_path)
+    mlflow.log_artifact(cm_path)
 
-        # Artefak 2 — Feature Importance
-        fi_path = "feature_importance.png"
-        plot_feature_importance(model, feature_names, fi_path)
-        mlflow.log_artifact(fi_path)
+    # Artefak 2 — Feature Importance
+    fi_path = "feature_importance.png"
+    plot_feature_importance(model, feature_names, fi_path)
+    mlflow.log_artifact(fi_path)
 
-        # Artefak 3 — Classification Report
-        report = classification_report(y_test, y_pred,
-                                        target_names=['Low Risk', 'High Risk'])
-        report_path = "classification_report.txt"
-        with open(report_path, 'w') as f:
-            f.write("=== Classification Report (CI Run) ===\n\n")
-            f.write(report)
-        mlflow.log_artifact(report_path)
+    # Artefak 3 — Classification Report
+    report = classification_report(y_test, y_pred, target_names=['Low Risk', 'High Risk'])
+    report_path = "classification_report.txt"
+    with open(report_path, 'w') as f:
+        f.write("=== Classification Report (CI Run) ===\n\n")
+        f.write(report)
+    mlflow.log_artifact(report_path)
 
-        # Log model
-        mlflow.sklearn.log_model(
-            sk_model      = model,
-            artifact_path = "random_forest_model"
-        )
+    # Log model
+    mlflow.sklearn.log_model(
+        sk_model      = model,
+        artifact_path = "random_forest_model"
+    )
 
-        print(f"\n Training selesai!")
-        print(f"   Run ID   : {run.info.run_id}")
-        print(f"   Artifact : confusion_matrix.png, feature_importance.png, classification_report.txt")
+    print(f"\n Training selesai!")
+    print(f"   Run ID   : {run.info.run_id}")
+    print(f"   Artifact : confusion_matrix.png, feature_importance.png, classification_report.txt")
 
     return model
 
