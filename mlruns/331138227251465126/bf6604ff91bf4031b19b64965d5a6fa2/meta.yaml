@@ -1,0 +1,15 @@
+artifact_uri: file:///home/runner/work/Workflow-CI/Workflow-CI/mlruns/331138227251465126/bf6604ff91bf4031b19b64965d5a6fa2/artifacts
+end_time: 1780639861042
+entry_point_name: ''
+experiment_id: '331138227251465126'
+lifecycle_stage: active
+run_id: bf6604ff91bf4031b19b64965d5a6fa2
+run_name: exultant-lark-723
+run_uuid: bf6604ff91bf4031b19b64965d5a6fa2
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1780639851205
+status: 3
+tags: []
+user_id: runner
