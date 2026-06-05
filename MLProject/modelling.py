@@ -126,7 +126,8 @@ def train_and_log(data_path: str):
     print(f"\n Memulai training Random Forest...")
     print(f"   Parameter: {params}")
 
-    with mlflow.start_run(run_name="rf_ci_run") as run:
+    active_run = mlflow.active_run()
+    with mlflow.start_run(run_name="rf_ci_run", run_id=active_run.info.run_id if active_run else None) as run:
 
         # Train model
         model = RandomForestClassifier(**params)
